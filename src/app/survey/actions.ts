@@ -60,21 +60,27 @@ export async function generateText({
   const isSurveyTimeLimitExceeded = await checkIsSurveyTimeLimitExceeded({
     accessToken,
   });
+  console.log(
+    "generateText > isSurveyTimeLimitExceeded",
+    isSurveyTimeLimitExceeded
+  );
   if (isSurveyTimeLimitExceeded) {
     return null;
   }
 
   const user = await UserModel.findOne({ accessToken });
+  console.log("generateText > user", user);
   const saveChatMessagesResult = await saveChatMessages({
     accessToken,
     newMessage,
   });
-
+  console.log("generateText > saveChatMessagesResult", saveChatMessagesResult);
   if (!saveChatMessagesResult.success) {
     return null;
   }
 
   const chatHistory = [...(user?.chatHistory ?? []), newMessage];
+  console.log("generateText > chatHistory", chatHistory);
 
   const result = streamText({
     model: openai("gpt-4o-mini"),
@@ -87,7 +93,7 @@ export async function generateText({
       });
     },
   });
-
+  console.log("generateText > result", result);
   return result.textStream;
 }
 
