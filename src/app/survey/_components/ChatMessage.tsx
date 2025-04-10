@@ -1,5 +1,5 @@
+import { FormattedMessageContent } from "@/app/survey/_components/FormattedMessageContent";
 import { CoreMessage } from "ai";
-import Markdown from "react-markdown";
 
 interface ChatMessageProps {
   message: CoreMessage;
@@ -29,11 +29,13 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
               : "bg-gray-100 dark:bg-gray-800 rounded-tl-none"
           }`}
         >
-          <Markdown>
-            {typeof message.content === "string"
-              ? message.content
-              : "Content not available"}
-          </Markdown>
+          <FormattedMessageContent
+            content={
+              typeof message.content === "string"
+                ? message.content
+                : "Content not available"
+            }
+          />
         </div>
       </div>
     </div>

@@ -117,7 +117,7 @@ export const AIUnstructured = () => {
               disabled={isLoading || !input.trim()}
               className="shrink-0"
             >
-              {isLoading ? "Sending..." : "Send"}
+              {isLoading ? "Loading..." : "Send"}
             </Button>
           </div>
         </div>

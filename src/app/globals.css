@@ -120,3 +120,73 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .prose-custom h1 {
+    @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl mt-4 mb-2;
+  }
+
+  .prose-custom h2 {
+    @apply scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight mt-4 mb-2;
+  }
+
+  .prose-custom h3 {
+    @apply scroll-m-20 text-2xl font-semibold tracking-tight mt-4 mb-2;
+  }
+
+  .prose-custom h4 {
+    @apply scroll-m-20 text-xl font-semibold tracking-tight mt-4 mb-2;
+  }
+
+  .prose-custom h5 {
+    @apply scroll-m-20 text-lg font-semibold tracking-tight mt-4 mb-2;
+  }
+
+  .prose-custom h6 {
+    @apply scroll-m-20 font-semibold tracking-tight mt-4 mb-2;
+  }
+
+  .prose-custom p {
+    @apply leading-7;
+  }
+
+  .prose-custom blockquote {
+    @apply border-l-2 pl-6 italic;
+  }
+
+  .prose-custom tr {
+    @apply m-0 border-t p-0 even:bg-muted;
+  }
+
+  .prose-custom th {
+    @apply border px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right;
+  }
+
+  .prose-custom td {
+    @apply border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right;
+  }
+
+  .prose-custom code {
+    @apply relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold;
+  }
+
+  .prose-custom small {
+    @apply text-sm font-medium leading-none;
+  }
+
+  .prose-custom ul {
+    @apply list-disc list-inside;
+  }
+
+  .prose-custom ol {
+    @apply list-decimal list-inside;
+  }
+
+  .prose-custom li {
+    @apply mb-2;
+  }
+
+  .prose-custom li p {
+    @apply inline;
+  }
+}
