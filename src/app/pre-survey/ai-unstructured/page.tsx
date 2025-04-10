@@ -1,12 +1,12 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { PreSurveyContent } from "@/components/pre-survey-content";
 import { verifyAccessToken } from "@/lib/verifyAccessToken";
 import { redirect } from "next/navigation";
 
-export default function AiUnstructuredPreSurvey() {
+function AiUnstructuredPreSurveyContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const [isVerified, setIsVerified] = useState(false);
@@ -58,5 +58,15 @@ export default function AiUnstructuredPreSurvey() {
       instructions="In this task, you will be asked to generate business ideas with the help of AI. You can interact with the AI assistant in any way you prefer - there are no specific guidelines for how to structure your conversation. Feel free to ask questions, request suggestions, or explore different business domains. You will have 15 minutes to collaborate with the AI to generate innovative business ideas."
       token={token!}
     />
+  );
+}
+
+export default function AiUnstructuredPreSurvey() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">
+      <div className="animate-pulse text-xl">Loading...</div>
+    </div>}>
+      <AiUnstructuredPreSurveyContent />
+    </Suspense>
   );
 }

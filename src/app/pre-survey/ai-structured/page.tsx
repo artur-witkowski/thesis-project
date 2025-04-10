@@ -1,12 +1,12 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { PreSurveyContent } from "@/components/pre-survey-content";
 import { verifyAccessToken } from "@/lib/verifyAccessToken";
 import { redirect } from "next/navigation";
 
-export default function AiStructuredPreSurvey() {
+function AiStructuredPreSurveyContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const [isVerified, setIsVerified] = useState(false);
@@ -58,5 +58,15 @@ export default function AiStructuredPreSurvey() {
       instructions="In this task, you will be asked to generate business ideas with the help of AI using a structured approach. You will follow specific prompts and guidelines to interact with the AI assistant. This structured method is designed to help you systematically explore different aspects of business ideation. You will have 15 minutes to collaborate with the AI to generate innovative business ideas following the provided framework."
       token={token!}
     />
+  );
+}
+
+export default function AiStructuredPreSurvey() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">
+      <div className="animate-pulse text-xl">Loading...</div>
+    </div>}>
+      <AiStructuredPreSurveyContent />
+    </Suspense>
   );
 }

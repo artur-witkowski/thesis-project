@@ -1,12 +1,12 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { PreSurveyContent } from "@/components/pre-survey-content";
 import { verifyAccessToken } from "@/lib/verifyAccessToken";
 import { redirect } from "next/navigation";
 
-export default function NoAiPreSurvey() {
+function NoAiPreSurveyContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const [isVerified, setIsVerified] = useState(false);
@@ -58,5 +58,15 @@ export default function NoAiPreSurvey() {
       instructions="In this task, you will be asked to generate business ideas using traditional brainstorming methods. You will have 15 minutes to come up with as many innovative business ideas as possible. Think creatively and don't worry about feasibility at this stage - focus on quantity and variety."
       token={token!}
     />
+  );
+}
+
+export default function NoAiPreSurvey() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">
+      <div className="animate-pulse text-xl">Loading...</div>
+    </div>}>
+      <NoAiPreSurveyContent />
+    </Suspense>
   );
 }

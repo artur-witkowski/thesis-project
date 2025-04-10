@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { verifyAccessToken } from "@/lib/verifyAccessToken";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 import debounce from "lodash.debounce";
 import { saveResults } from "@/app/survey/actions";
 
-export default function SurveyPage() {
+function SurveyPageContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const [isVerified, setIsVerified] = useState(false);
@@ -166,5 +166,15 @@ export default function SurveyPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SurveyPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">
+      <div className="animate-pulse text-xl">Loading...</div>
+    </div>}>
+      <SurveyPageContent />
+    </Suspense>
   );
 }
