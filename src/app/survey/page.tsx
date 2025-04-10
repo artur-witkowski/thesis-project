@@ -3,12 +3,15 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import { verifyAccessToken } from "@/lib/verifyAccessToken";
-import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import dayjs from "dayjs";
 import debounce from "lodash.debounce";
 import { saveResults } from "@/app/survey/actions";
+import { NoAI } from "@/app/survey/_components/NoAI";
+import { AIUnstructured } from "@/app/survey/_components/AIUnstructured";
+import { AIStructured } from "@/app/survey/_components/AIStructured";
+import { useRouter } from "next/navigation";
 
 function SurveyPageContent() {
   const searchParams = useSearchParams();
@@ -18,18 +21,25 @@ function SurveyPageContent() {
   const [taskType, setTaskType] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [results, setResults] = useState("");
+  const router = useRouter();
+
+  useEffect(() => {
+    if (timeLeft !== null && timeLeft <= 0) {
+      router.replace(`/results?token=${token}`);
+    }
+  }, [timeLeft, token, router]);
 
   useEffect(() => {
     async function verifyToken() {
       if (!token) {
-        redirect("/");
+        router.replace("/");
         return;
       }
 
       try {
         const result = await verifyAccessToken(token);
         if (!result.valid) {
-          redirect("/");
+          router.replace("/");
           return;
         }
 
@@ -43,7 +53,7 @@ function SurveyPageContent() {
         setIsVerified(true);
       } catch (error) {
         console.error("Error verifying token:", error);
-        redirect("/");
+        router.replace("/");
       } finally {
         setIsLoading(false);
       }
@@ -61,8 +71,6 @@ function SurveyPageContent() {
         if (!prevTime) return null;
         if (prevTime <= 1) {
           clearInterval(timer);
-          // Redirect to results page when time is up
-          // redirect(`/results?token=${token}`);
           return 0;
         }
         return prevTime - 1;
@@ -70,7 +78,7 @@ function SurveyPageContent() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isVerified, token]);
+  }, [isVerified, token, router]);
 
   // Format time as MM:SS
   const formatTime = (seconds: number) => {
@@ -81,16 +89,18 @@ function SurveyPageContent() {
       .padStart(2, "0")}`;
   };
 
-  if (isLoading) {
+  if (
+    isLoading ||
+    !isVerified ||
+    !token ||
+    timeLeft === null ||
+    timeLeft <= 0
+  ) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-xl">Loading...</div>
       </div>
     );
-  }
-
-  if (!isVerified) {
-    return null; // Will redirect in useEffect
   }
 
   const handleSaveResults = debounce(async (unsavedResults: string) => {
@@ -128,20 +138,11 @@ function SurveyPageContent() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-neutral-700 mb-4">
-                This is a placeholder for the {taskType} survey interface. The
-                full implementation will include:
-              </p>
-              <ul className="list-disc pl-5 space-y-2 mb-6">
-                <li>Chat interface for AI-assisted tasks</li>
-                <li>Input field for traditional ideation</li>
-                <li>Instructions specific to the task type</li>
-                <li>Progress tracking</li>
-              </ul>
-              <p className="text-sm text-neutral-500 italic">
-                Note: This page will be fully implemented in the next
-                development phase.
-              </p>
+              {taskType === "no-ai" && <NoAI />}
+
+              {taskType === "ai-structured" && <AIStructured />}
+
+              {taskType === "ai-unstructured" && <AIUnstructured />}
             </CardContent>
           </Card>
         </div>
@@ -171,9 +172,13 @@ function SurveyPageContent() {
 
 export default function SurveyPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">
-      <div className="animate-pulse text-xl">Loading...</div>
-    </div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-pulse text-xl">Loading...</div>
+        </div>
+      }
+    >
       <SurveyPageContent />
     </Suspense>
   );
