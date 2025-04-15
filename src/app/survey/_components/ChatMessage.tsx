@@ -1,3 +1,5 @@
+"use client";
+
 import { FormattedMessageContent } from "@/app/survey/_components/FormattedMessageContent";
 import { CoreMessage } from "ai";
 

@@ -13,6 +13,8 @@ const userSchema = new mongoose.Schema({
   datetimeSurveyStarted: { type: Date },
   chatHistory: { type: Array, default: [] },
   results: { type: String, default: "" },
+  currentStep: { type: Number, default: null },
+  datetimeSurveyFinishedEarly: { type: Date, default: null },
 });
 
 export const UserModel =

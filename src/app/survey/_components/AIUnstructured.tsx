@@ -13,7 +13,7 @@ export const AIUnstructured = () => {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const [messages, setMessages] = useState<CoreMessage[]>([]);
-  const [input, setInput] = useState("");
+  const [userInput, setUserInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -28,12 +28,12 @@ export const AIUnstructured = () => {
   }, [messages]);
 
   const handleSendChatMessage = async () => {
-    if (!input.trim() || !token) return;
+    if (!userInput.trim() || !token) return;
 
     setIsLoading(true);
-    const newMessage: CoreMessage = { role: "user", content: input };
+    const newMessage: CoreMessage = { role: "user", content: userInput };
     setMessages((prev) => [...prev, newMessage]);
-    setInput("");
+    setUserInput("");
 
     try {
       const answer = await generateText({
@@ -105,8 +105,8 @@ export const AIUnstructured = () => {
         <div className="p-4 border-t">
           <div className="flex gap-2">
             <Textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type your message here..."
               className="min-h-[60px] resize-none"
@@ -114,7 +114,7 @@ export const AIUnstructured = () => {
             />
             <Button
               onClick={handleSendChatMessage}
-              disabled={isLoading || !input.trim()}
+              disabled={isLoading || !userInput.trim()}
               className="shrink-0"
             >
               {isLoading ? "Loading..." : "Send"}

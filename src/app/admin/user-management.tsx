@@ -58,6 +58,8 @@ export function UserManagement({ initialUsers }: UserManagementProps) {
             datetimeSurveyStarted: null,
             chatHistory: [],
             results: "",
+            currentStep: null,
+            datetimeSurveyFinishedEarly: null,
           },
         ]);
       } else {
@@ -90,6 +92,12 @@ export function UserManagement({ initialUsers }: UserManagementProps) {
       setError("An error occurred while deleting the user");
       console.error(err);
     }
+  };
+
+  const handleCopyUrl = (accessToken: string) => {
+    navigator.clipboard.writeText(
+      `${process.env.NEXT_PUBLIC_FRONTEND_URL}/?token=${accessToken}`
+    );
   };
 
   return (
@@ -166,6 +174,14 @@ export function UserManagement({ initialUsers }: UserManagementProps) {
                         onClick={() => handleDeleteUser(user.id)}
                       >
                         Delete
+                      </Button>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => handleCopyUrl(user.accessToken)}
+                        className="ml-2"
+                      >
+                        Copy URL
                       </Button>
                     </TableCell>
                   </TableRow>

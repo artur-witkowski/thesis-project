@@ -20,7 +20,7 @@ export default async function AdminPage() {
     typeOfTask: (typeof TYPE_OF_TASK)[keyof typeof TYPE_OF_TASK];
     datetimeSurveyStarted: Date | null;
     chatHistory: Array<{
-      role: "user" | "assistant";
+      role: "user" | "assistant" | "system";
       content: string;
     }>;
     results: string;

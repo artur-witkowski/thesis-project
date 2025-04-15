@@ -7,11 +7,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import dayjs from "dayjs";
 import debounce from "lodash.debounce";
-import { saveResults } from "@/app/survey/actions";
+import { endSurveyEarly, saveResults } from "@/app/survey/actions";
 import { NoAI } from "@/app/survey/_components/NoAI";
 import { AIUnstructured } from "@/app/survey/_components/AIUnstructured";
 import { AIStructured } from "@/app/survey/_components/AIStructured";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 function SurveyPageContent() {
   const searchParams = useSearchParams();
@@ -22,6 +31,7 @@ function SurveyPageContent() {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [results, setResults] = useState("");
   const router = useRouter();
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   useEffect(() => {
     if (timeLeft !== null && timeLeft <= 0) {
@@ -40,6 +50,11 @@ function SurveyPageContent() {
         const result = await verifyAccessToken(token);
         if (!result.valid) {
           router.replace("/");
+          return;
+        }
+
+        if (result.datetimeSurveyFinishedEarly) {
+          router.replace(`/results?token=${token}`);
           return;
         }
 
@@ -107,12 +122,18 @@ function SurveyPageContent() {
     await saveResults({ accessToken: token!, results: unsavedResults });
   }, 1000);
 
+  const handleEndSurvey = async () => {
+    await endSurveyEarly({ accessToken: token! });
+    router.replace(`/results?token=${token}`);
+  };
+
   return (
     <div className="container mx-auto px-4 py-6 min-h-screen">
       <div className="sticky top-0 bg-white z-10 py-3 border-b mb-6 flex justify-between items-center">
         <h1 className="text-xl font-semibold">
           Entrepreneurship Research Survey
         </h1>
+        <Button onClick={() => setShowConfirmDialog(true)}>End survey</Button>
         <div
           className={`text-xl font-mono px-4 py-2 rounded-md ${
             timeLeft && timeLeft <= 60
@@ -166,6 +187,27 @@ function SurveyPageContent() {
           </Card>
         </div>
       </div>
+
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Finish early?</DialogTitle>
+            <DialogDescription>
+              You are about to finish the survey early. Are you sure you want to
+              proceed?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowConfirmDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleEndSurvey}>Finish the survey</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -10,6 +10,7 @@ export async function verifyAccessToken(accessToken: string): Promise<{
   taskType?: (typeof TYPE_OF_TASK)[keyof typeof TYPE_OF_TASK];
   datetimeSurveyStarted?: Date;
   results?: string;
+  datetimeSurveyFinishedEarly?: Date;
 }> {
   try {
     await dbConnect();
@@ -26,6 +27,7 @@ export async function verifyAccessToken(accessToken: string): Promise<{
       taskType: user.typeOfTask,
       datetimeSurveyStarted: user.datetimeSurveyStarted,
       results: user.results,
+      datetimeSurveyFinishedEarly: user.datetimeSurveyFinishedEarly,
     };
   } catch (error) {
     console.error("Error verifying access token:", error);

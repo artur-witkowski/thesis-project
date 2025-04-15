@@ -5,7 +5,7 @@ import { openai } from "@ai-sdk/openai";
 import { CoreMessage, smoothStream, streamText } from "ai";
 import dayjs from "dayjs";
 
-const checkIsSurveyTimeLimitExceeded = async ({
+const checkIfSurveyDataCanBeChanged = async ({
   accessToken,
 }: {
   accessToken: string;
@@ -16,12 +16,13 @@ const checkIsSurveyTimeLimitExceeded = async ({
   }
 
   const maxFinishedTime = dayjs(user.datetimeSurveyStarted).add(15, "minute");
+  const isSurveyFinishedEarly = !!user.datetimeSurveyFinishedEarly;
 
-  if (dayjs().isAfter(maxFinishedTime)) {
-    return true;
+  if (dayjs().isAfter(maxFinishedTime) || isSurveyFinishedEarly) {
+    return false;
   }
 
-  return false;
+  return true;
 };
 
 export async function saveResults({
@@ -37,10 +38,10 @@ export async function saveResults({
     return { success: false, error: "User not found" };
   }
 
-  const isSurveyTimeLimitExceeded = await checkIsSurveyTimeLimitExceeded({
+  const doesSurveyDataCanBeChanged = await checkIfSurveyDataCanBeChanged({
     accessToken,
   });
-  if (isSurveyTimeLimitExceeded) {
+  if (!doesSurveyDataCanBeChanged) {
     return { success: false, error: "Survey time limit exceeded" };
   }
 
@@ -57,14 +58,14 @@ export async function generateText({
   accessToken: string;
   newMessage: CoreMessage;
 }) {
-  const isSurveyTimeLimitExceeded = await checkIsSurveyTimeLimitExceeded({
+  const doesSurveyDataCanBeChanged = await checkIfSurveyDataCanBeChanged({
     accessToken,
   });
   console.log(
-    "generateText > isSurveyTimeLimitExceeded",
-    isSurveyTimeLimitExceeded
+    "generateText > doesSurveyDataCanBeChanged",
+    doesSurveyDataCanBeChanged
   );
-  if (isSurveyTimeLimitExceeded) {
+  if (!doesSurveyDataCanBeChanged) {
     return null;
   }
 
@@ -100,6 +101,47 @@ export async function generateText({
   return result.textStream;
 }
 
+const steps = [
+  {
+    systemPrompt: `You are an AI assistant helping with a creativity research experiment. The user is in the EXPLORE phase of idea generation. Your goal is to encourage FLUENCY - generating many ideas quickly without worrying about quality.`,
+  },
+  {
+    systemPrompt: `You are an AI assistant helping with a creativity research experiment. The user is in the SHIFT PERSPECTIVES phase of idea generation. Your goal is to encourage FLEXIBILITY - thinking of different types of ideas from various angles.`,
+  },
+  {
+    systemPrompt: `You are an AI assistant helping with a creativity research experiment. The user is in the BE UNIQUE phase of idea generation. Your goal is to encourage ORIGINALITY - making ideas stand out with twists or innovations.`,
+  },
+  {
+    systemPrompt: `You are an AI assistant helping with a creativity research experiment. The user is in the DEEPEN ONE phase of idea generation. Your goal is to encourage ELABORATION - developing one idea in greater detail.`,
+  },
+];
+
+export async function goToTheStep({
+  accessToken,
+  step,
+}: {
+  accessToken: string;
+  step: number;
+}) {
+  const user = await UserModel.findOne({ accessToken });
+  if (!user) {
+    return { success: false, error: "User not found" };
+  }
+  const foundStep = steps[step];
+  if (!foundStep) {
+    return { success: false, error: "Step not found" };
+  }
+
+  user.chatHistory = [
+    ...(user.chatHistory ?? []),
+    { role: "system", content: foundStep.systemPrompt },
+  ];
+  user.currentStep = step;
+  await user.save();
+
+  return { success: true };
+}
+
 async function saveChatMessages({
   accessToken,
   newMessage,
@@ -123,5 +165,28 @@ async function saveChatMessages({
 
 export async function getChatHistory({ accessToken }: { accessToken: string }) {
   const user = await UserModel.findOne({ accessToken });
-  return user?.chatHistory ?? [];
+  return (
+    user?.chatHistory?.filter((m: CoreMessage) => m.role !== "system") ?? []
+  );
 }
+
+export async function getCurrentStep({ accessToken }: { accessToken: string }) {
+  const user = await UserModel.findOne({ accessToken });
+  return user?.currentStep ?? null;
+}
+
+export const endSurveyEarly = async ({
+  accessToken,
+}: {
+  accessToken: string;
+}) => {
+  const user = await UserModel.findOne({ accessToken });
+  if (!user) {
+    return { success: false, error: "User not found" };
+  }
+
+  user.datetimeSurveyFinishedEarly = new Date();
+  await user.save();
+
+  return { success: true };
+};

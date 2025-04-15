@@ -9,9 +9,11 @@ export interface User {
   accessToken: string;
   typeOfTask: (typeof TYPE_OF_TASK)[keyof typeof TYPE_OF_TASK];
   chatHistory: Array<{
-    role: "user" | "assistant";
+    role: "user" | "assistant" | "system";
     content: string;
   }>;
   results: string;
   datetimeSurveyStarted: Date | null;
+  currentStep: number | null;
+  datetimeSurveyFinishedEarly: Date | null;
 }
