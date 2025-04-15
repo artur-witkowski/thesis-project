@@ -1,35 +1,35 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import { PreSurveyContent } from "@/components/pre-survey-content";
 import { verifyAccessToken } from "@/lib/verifyAccessToken";
-import { redirect } from "next/navigation";
 
 function NoAiPreSurveyContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const [isVerified, setIsVerified] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     async function verifyToken() {
       if (!token) {
-        redirect("/");
+        router.replace("/");
         return;
       }
 
       try {
         const result = await verifyAccessToken(token);
         if (!result.valid || result.taskType !== "no-ai") {
-          redirect("/");
+          router.replace("/");
           return;
         }
 
         setIsVerified(true);
       } catch (error) {
         console.error("Error verifying token:", error);
-        redirect("/");
+        router.replace("/");
       } finally {
         setIsLoading(false);
       }
@@ -63,9 +63,13 @@ function NoAiPreSurveyContent() {
 
 export default function NoAiPreSurvey() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">
-      <div className="animate-pulse text-xl">Loading...</div>
-    </div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-pulse text-xl">Loading...</div>
+        </div>
+      }
+    >
       <NoAiPreSurveyContent />
     </Suspense>
   );

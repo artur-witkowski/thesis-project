@@ -2,13 +2,9 @@
 
 import { verifyAccessToken } from "@/lib/verifyAccessToken";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
-export default function PreSurveyLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function PreSurveyLayoutContent({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const router = useRouter();
@@ -53,5 +49,23 @@ export default function PreSurveyLayout({
         children
       )}
     </div>
+  );
+}
+
+export default function PreSurveyLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-pulse text-xl">Loading...</div>
+        </div>
+      }
+    >
+      <PreSurveyLayoutContent>{children}</PreSurveyLayoutContent>
+    </Suspense>
   );
 }

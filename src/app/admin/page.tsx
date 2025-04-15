@@ -24,6 +24,8 @@ export default async function AdminPage() {
       content: string;
     }>;
     results: string;
+    currentStep: number | null;
+    datetimeSurveyFinishedEarly: Date | null;
   }> = [];
   if (isAuthenticated) {
     try {
@@ -38,6 +40,8 @@ export default async function AdminPage() {
         datetimeSurveyStarted: user.datetimeSurveyStarted || null,
         chatHistory: user.chatHistory || [],
         results: user.results || "",
+        currentStep: user.currentStep || null,
+        datetimeSurveyFinishedEarly: user.datetimeSurveyFinishedEarly || null,
       }));
     } catch (error: unknown) {
       console.error("Error fetching users:", error);

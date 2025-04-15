@@ -1,42 +1,42 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import { PreSurveyContent } from "@/components/pre-survey-content";
 import { verifyAccessToken } from "@/lib/verifyAccessToken";
-import { redirect } from "next/navigation";
 
 function AiStructuredPreSurveyContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const [isVerified, setIsVerified] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     async function verifyToken() {
       if (!token) {
-        redirect("/");
+        router.replace("/");
         return;
       }
 
       try {
         const result = await verifyAccessToken(token);
         if (!result.valid || result.taskType !== "ai-structured") {
-          redirect("/");
+          router.replace("/");
           return;
         }
 
         setIsVerified(true);
       } catch (error) {
         console.error("Error verifying token:", error);
-        redirect("/");
+        router.replace("/");
       } finally {
         setIsLoading(false);
       }
     }
 
     verifyToken();
-  }, [token]);
+  }, [token, router]);
 
   if (isLoading) {
     return (
@@ -63,9 +63,13 @@ function AiStructuredPreSurveyContent() {
 
 export default function AiStructuredPreSurvey() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">
-      <div className="animate-pulse text-xl">Loading...</div>
-    </div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-pulse text-xl">Loading...</div>
+        </div>
+      }
+    >
       <AiStructuredPreSurveyContent />
     </Suspense>
   );
