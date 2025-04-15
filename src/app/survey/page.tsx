@@ -147,7 +147,9 @@ function SurveyPageContent() {
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         {/* This is a placeholder for the actual survey implementation */}
-        <div className="md:col-span-7">
+        <div
+          className={taskType === "no-ai" ? "md:col-span-5" : "md:col-span-7"}
+        >
           <Card>
             <CardHeader>
               <CardTitle>
@@ -168,7 +170,9 @@ function SurveyPageContent() {
           </Card>
         </div>
 
-        <div className="md:col-span-5">
+        <div
+          className={taskType === "no-ai" ? "md:col-span-7" : "md:col-span-5"}
+        >
           <Card>
             <CardHeader>
               <CardTitle>Your Ideas</CardTitle>
