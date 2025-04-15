@@ -92,8 +92,11 @@ export async function generateText({
         newMessage: { role: "assistant", content: result.text },
       });
     },
+    onError: (error) => {
+      console.error("Error generating response:", error);
+    },
   });
-  console.log("generateText > result", result);
+
   return result.textStream;
 }
 
